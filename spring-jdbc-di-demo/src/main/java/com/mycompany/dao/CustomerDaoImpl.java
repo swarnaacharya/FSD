@@ -19,86 +19,40 @@ import com.sun.corba.se.spi.orbutil.fsm.State;
 import com.sun.crypto.provider.RSACipher;
 import com.sun.org.apache.xml.internal.dtm.ref.CustomStringPool;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
 public class CustomerDaoImpl implements CustomerDao {
 
-	private DataSource dataSource=null;
-	
-	
+	private JdbcTemplate jdbcTemplate;
+
 	@Override
- public void createCustomer(Customer customer) {
-		Connection connection=null;
-		 Statement statement=null;
-		 PreparedStatement pStatement=null;
+	public void createCustomer(Customer customer) {
+		jdbcTemplate.update("insert into customers(FirstName,Lastname,email) values (?,?,?)",
+				customer.getFirstName(),customer.getLastName(),customer.getEmail());
 		
-		try {
-			connection=dataSource.getConnection();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		System.out.println(dataSource.toString());
-		try {
-			pStatement=connection.prepareStatement("insert into customer(FirstName,LastName,Email) values(?,?,?)");
-			pStatement.setString(1, customer.getFirstName());
-			pStatement.setString(2, customer.getLastName());
-			pStatement.setString(3, customer.getEmail());
-			pStatement.executeUpdate();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
-
-
-	public CustomerDaoImpl(DataSource dataSource) {
-		
-		this.dataSource = dataSource;
+	@Override
+	public List<Customer> getAllCustomer() {
+		// TODO Auto-generated method stub
+		return jdbcTemplate.query("select first_name,last_name,email from customers", new CustomerMApper());
 	}
 
-	public List<Customer> retrieveCustomer()
+	public void deleteCustomer()
 	{
-		List<Customer> list =new ArrayList<Customer>();
-		Connection connection=null;
-		Statement statement=null;
-		PreparedStatement preparedStatement =null;
-		
-		
-		
-		try{
-			
-				connection=dataSource.getConnection();	
-		}
-		catch(SQLException e)
-		{
-		   e.printStackTrace();	
-		}
-		System.out.print(dataSource.toString());
-		
-		try {
-				statement =connection.createStatement();
-				ResultSet rs =statement.executeQuery("select * from customer");
-			while(rs.next());
-			{
-				list.add(new Customer(rs.getString(1),rs.getString(2),rs.getString(3)));
-			}
-		}
-		
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
-	return list;
-			
-	
-		
+		jdbcTemplate.update("delete from Customers where id=?",19);
 	}
 	
-	
-	
-	
-	
+	public void updateCustomer(Customer cust)
+	{
+		jdbcTemplate.update("update from Customers where id=4 set  email=? ",cust.getFirstName(),
+		cust.getLastName(),cust.getEmail());
+	}
 }
